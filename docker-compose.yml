@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: latish-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin834
+      POSTGRES_DB: job_application_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5458:5432"
+
+  backend:
+    build: ./Backend
+    container_name: latish-backend
+    ports:
+      - "3060:3060"
+    depends_on:
+      - postgres
+    environment:
+      DB_USER: postgres
+      DB_HOST: postgres
+      DB_NAME: job_application_db
+      DB_PASSWORD: admin834
+      DB_PORT: 5432
+    restart: always
+
+  employee_form:
+    build: ./Employee_Formfilling
+    container_name: employee-formfilling
+    ports:
+      - "8068:80"
+    depends_on:
+      - backend
+
+  hr_form:
+    build: ./HR_FormFilling
+    container_name: hr-formfilling
+    ports:
+      - "8069:80"
+    depends_on:
+      - backend
+
+  welcome_page:
+    build: ./Welcome-Page
+    container_name: welcome-page
+    ports:
+      - "8070:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
